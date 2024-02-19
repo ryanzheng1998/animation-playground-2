@@ -1,7 +1,7 @@
 "use client";
 
+import { useRequestAnimation } from "@/hooks/useRequestAnimation";
 import { useRef } from "react";
-import { useRequestAnimation } from "./useRequestAnimation";
 
 export default function Home() {
   const ref = useRef<HTMLParagraphElement>(null);
@@ -12,9 +12,5 @@ export default function Home() {
     }
   });
 
-  return (
-    <div className="">
-      <p id="temp" ref={ref}></p>
-    </div>
-  );
+  return <p ref={ref} />;
 }
