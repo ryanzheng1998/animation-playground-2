@@ -18,7 +18,9 @@ export default function Home() {
     if (element) {
       const { position, velocity } = animationState;
 
-      const nextPosition = position + velocity;
+      const timeDelta = time - animationState.time;
+
+      const nextPosition = position + velocity * timeDelta;
 
       element.style.transform = `translateX(${nextPosition}px)`;
 

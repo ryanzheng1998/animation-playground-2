@@ -10,7 +10,7 @@ export default function Home() {
     time: 0,
     position: 0,
     velocity: 0,
-    damping: 0.9,
+    damping: 0.056,
   };
 
   useRequestAnimation((time) => {
@@ -19,8 +19,10 @@ export default function Home() {
     if (element) {
       const { position, velocity } = animationState;
 
-      const nextPosition = position + velocity;
-      const nextVelocity = velocity * animationState.damping;
+      const timeDelta = time - animationState.time;
+
+      const nextPosition = position + velocity * timeDelta;
+      const nextVelocity = velocity * animationState.damping * timeDelta;
 
       element.style.transform = `translateX(${nextPosition}px)`;
 
@@ -40,7 +42,7 @@ export default function Home() {
         onClick={() => {
           animationState = {
             ...animationState,
-            velocity: 10,
+            velocity: 1,
           };
         }}
       >
