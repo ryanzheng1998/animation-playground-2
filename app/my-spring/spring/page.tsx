@@ -5,6 +5,7 @@ import { useRef } from "react";
 
 export default function Home() {
   const ref = useRef<HTMLDivElement>(null);
+
   const animationState = useRef({
     time: 0,
     position: 0,
@@ -17,29 +18,29 @@ export default function Home() {
   useRequestAnimation((time) => {
     const element = ref.current;
 
-    if (element) {
-      const { position, velocity } = animationState.current;
-      const timeDelta = time - animationState.current.time;
-      const springPosition = animationState.current.springPosition;
-      const springStiffness = animationState.current.springStiffness;
+    if (element === null) return;
 
-      // Apply spring force
-      const springForce = (springPosition - position) * springStiffness;
-      const nextVelocity = velocity + springForce * timeDelta;
+    const { position, velocity } = animationState.current;
+    const timeDelta = time - animationState.current.time;
+    const springPosition = animationState.current.springPosition;
+    const springStiffness = animationState.current.springStiffness;
 
-      const nextPosition = position + velocity * timeDelta;
-      const nextVelocity2 =
-        nextVelocity * animationState.current.damping * timeDelta;
+    // Apply spring force
+    const springForce = (springPosition - position) * springStiffness;
+    const nextVelocity = velocity + springForce * timeDelta;
 
-      element.style.transform = `translateX(${nextPosition}px)`;
+    const nextPosition = position + velocity * timeDelta;
+    const nextVelocity2 =
+      nextVelocity * animationState.current.damping * timeDelta;
 
-      animationState.current = {
-        ...animationState.current,
-        time,
-        position: nextPosition,
-        velocity: nextVelocity2,
-      };
-    }
+    element.style.transform = `translateX(${nextPosition}px)`;
+
+    animationState.current = {
+      ...animationState.current,
+      time,
+      position: nextPosition,
+      velocity: nextVelocity2,
+    };
   }, []);
 
   return (
