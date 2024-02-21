@@ -9,6 +9,7 @@ export default function Home() {
   const ref = useSpring<HTMLParagraphElement>({
     springPosition: flip ? 1 : 0,
     transform: (position, element) => {
+      // console.log(position.toFixed(2));
       element.textContent = position.toFixed(2);
     },
   });

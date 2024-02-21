@@ -10,7 +10,7 @@ export default function Home() {
     time: 0,
     position: 0,
     velocity: 0,
-    damping: 0.8 / 16,
+    damping: 0.999 / 16,
     springPosition: 0,
     springStiffness: 0.4 / 16 / 16 / 16,
   });
@@ -25,13 +25,11 @@ export default function Home() {
     const springPosition = animationState.current.springPosition;
     const springStiffness = animationState.current.springStiffness;
 
-    // Apply spring force
     const springForce = (springPosition - position) * springStiffness;
-    const nextVelocity = velocity + springForce * timeDelta;
-
-    const nextPosition = position + velocity * timeDelta;
-    const nextVelocity2 =
-      nextVelocity * animationState.current.damping * timeDelta;
+    const dampingForce = -velocity * animationState.current.damping;
+    const totalForce = springForce + dampingForce;
+    const nextVelocity = velocity + totalForce * timeDelta;
+    const nextPosition = position + nextVelocity * timeDelta;
 
     element.style.transform = `translateX(${nextPosition}px)`;
 
@@ -39,7 +37,7 @@ export default function Home() {
       ...animationState.current,
       time,
       position: nextPosition,
-      velocity: nextVelocity2,
+      velocity: nextVelocity,
     };
   }, []);
 

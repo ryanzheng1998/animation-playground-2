@@ -21,19 +21,11 @@ export const useSpring = <T extends HTMLElement>(config: {
     if (element === null) return;
 
     const { position, velocity } = animationState.current;
-    const {
-      springPosition,
-      stiffness = 0.4 / 16 / 16 / 16,
-      damping = 0.8 / 15,
-      precision = 0.01,
-    } = config;
+    const { springPosition } = config;
+    const stiffness = config.stiffness ?? 0.4 / 16 / 16 / 16;
+    const damping = config.damping ?? 0.8 / 16;
+    const precision = config.precision ?? 0.01;
     const timeDelta = time - animationState.current.time;
-
-    // Prevent animation jump when tab is inactive
-    if (timeDelta > 100) {
-      animationState.current.time = time;
-      return true;
-    }
 
     // Cancel animation frame when animation stop
     if (
@@ -41,21 +33,21 @@ export const useSpring = <T extends HTMLElement>(config: {
       Math.abs(position - springPosition) < precision
     ) {
       config.transform?.(springPosition, element);
-      animationState.current = {
-        ...animationState.current,
-        time,
-        position: springPosition,
-        velocity: 0,
-      };
       return false;
     }
 
-    // Spring force calculation
+    // Prevent animation jump when tab is inactive
+    if (timeDelta > 100) {
+      animationState.current.time = time;
+      return true;
+    }
+
+    // Apply spring force
     const springForce = (springPosition - position) * stiffness;
-    const dampingForce = -velocity * damping;
-    const totalForce = springForce + dampingForce;
-    const nextVelocity = velocity + totalForce * timeDelta;
-    const nextPosition = position + nextVelocity * timeDelta;
+    const nextVelocity = velocity + springForce * timeDelta;
+
+    const nextPosition = position + velocity * timeDelta;
+    const nextVelocity2 = nextVelocity * damping * timeDelta;
 
     config.transform?.(nextPosition, element);
 
@@ -63,10 +55,8 @@ export const useSpring = <T extends HTMLElement>(config: {
       ...animationState.current,
       time,
       position: nextPosition,
-      velocity: nextVelocity,
+      velocity: nextVelocity2,
     };
-
-    return true;
   }, []);
 
   return ref;
