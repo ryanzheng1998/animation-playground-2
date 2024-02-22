@@ -23,12 +23,11 @@ export const useSpring = <T extends HTMLElement>(config: {
     const { springPosition, stiffness, damping } = config;
     const timeDelta = time - animationState.current.time;
 
-    // Apply spring force
     const springForce = (springPosition - position) * stiffness;
-    const nextVelocity = velocity + springForce * timeDelta;
-
-    const nextPosition = position + velocity * timeDelta;
-    const nextVelocity2 = nextVelocity * damping * timeDelta;
+    const dampingForce = -velocity * damping;
+    const totalForce = springForce + dampingForce;
+    const nextVelocity = velocity + totalForce * timeDelta;
+    const nextPosition = position + nextVelocity * timeDelta;
 
     config.transform(nextPosition, element);
 
@@ -36,7 +35,7 @@ export const useSpring = <T extends HTMLElement>(config: {
       ...animationState.current,
       time,
       position: nextPosition,
-      velocity: nextVelocity2,
+      velocity: nextVelocity,
     };
   }, []);
 
