@@ -14,7 +14,14 @@ export const Inputs = () => {
           state.setState({ from: Number(e.target.value) });
         }}
       />
-      <label>{state.from}</label>
+      <input
+        className="w-20"
+        type="number"
+        value={state.from}
+        onChange={(e) => {
+          state.setState({ from: Number(e.target.value) });
+        }}
+      />
 
       <label className="justify-self-end">Spring Position</label>
       <input
@@ -26,7 +33,14 @@ export const Inputs = () => {
           state.setState({ springPosition: Number(e.target.value) });
         }}
       />
-      <label>{state.springPosition}</label>
+      <input
+        className="w-20"
+        type="number"
+        value={state.springPosition}
+        onChange={(e) => {
+          state.setState({ springPosition: Number(e.target.value) });
+        }}
+      />
 
       <label className="justify-self-end">Stiffness</label>
       <input
@@ -38,7 +52,14 @@ export const Inputs = () => {
           state.setState({ stiffness: Number(e.target.value) });
         }}
       />
-      <label>{state.stiffness}</label>
+      <input
+        className="w-20"
+        type="number"
+        value={state.stiffness}
+        onChange={(e) => {
+          state.setState({ stiffness: Number(e.target.value) });
+        }}
+      />
 
       <label className="justify-self-end">Damping</label>
       <input
@@ -50,19 +71,34 @@ export const Inputs = () => {
           state.setState({ damping: Number(e.target.value) });
         }}
       />
-      <label>{state.damping}</label>
+      <input
+        className="w-20"
+        type="number"
+        value={state.damping}
+        onChange={(e) => {
+          state.setState({ damping: Number(e.target.value) });
+        }}
+      />
 
       <label className="justify-self-end">Precision</label>
       <input
         type="range"
-        min={0.001}
+        min={0}
         max={1}
+        step={0.005}
         value={state.precision}
         onChange={(e) => {
           state.setState({ precision: Number(e.target.value) });
         }}
       />
-      <label>{state.precision}</label>
+      <input
+        className="w-20"
+        type="number"
+        value={state.precision}
+        onChange={(e) => {
+          state.setState({ precision: Number(e.target.value) });
+        }}
+      />
     </div>
   );
 };

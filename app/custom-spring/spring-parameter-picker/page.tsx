@@ -10,7 +10,7 @@ export default function Home() {
   const cruve = generateCruve(state);
 
   return (
-    <div className="grid place-items-center p-10">
+    <div className="grid place-items-center gap-5 p-10">
       <h1 className="text-4xl font-bold">Spring Parameter Picker</h1>
       <Inputs />
       <LineChart
@@ -22,7 +22,7 @@ export default function Home() {
           },
         ]}
         width={1000}
-        height={600}
+        height={400}
       />
     </div>
   );
