@@ -10,9 +10,9 @@ export default function Home() {
     time: 0,
     position: 0,
     velocity: 0,
-    damping: 0.999 / 16,
+    damping: 12,
     springPosition: 0,
-    springStiffness: 0.4 / 16 / 16 / 16,
+    springStiffness: 180,
   });
 
   useRequestAnimation((time) => {
@@ -21,7 +21,7 @@ export default function Home() {
     if (element === null) return;
 
     const { position, velocity } = animationState.current;
-    const timeDelta = time - animationState.current.time;
+    const timeDelta = (time - animationState.current.time) / 1000;
     const springPosition = animationState.current.springPosition;
     const springStiffness = animationState.current.springStiffness;
 

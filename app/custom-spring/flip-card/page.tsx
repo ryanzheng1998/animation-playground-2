@@ -1,4 +1,5 @@
 "use client";
+import { preset } from "@/config/preset";
 import Image from "next/image";
 import { useState } from "react";
 import { useSpring } from "./useSpring";
@@ -8,8 +9,7 @@ export default function Home() {
 
   const ref = useSpring<HTMLImageElement>({
     springPosition: flip ? 180 : 0,
-    stiffness: 0.4 / 16 / 16 / 16,
-    damping: 0.8 / 16,
+    ...preset.wobbly,
     transform: (position, element) => {
       element.style.transform = `perspective(1000px) rotateX(${position}deg)`;
     },
@@ -17,8 +17,7 @@ export default function Home() {
 
   const ref2 = useSpring<HTMLImageElement>({
     springPosition: flip ? 180 : 0,
-    stiffness: 0.4 / 16 / 16 / 16,
-    damping: 0.8 / 16,
+    ...preset.wobbly,
     transform: (position, element) => {
       element.style.transform = `perspective(1000px) rotateX(${position}deg) rotateX(180deg)`;
     },

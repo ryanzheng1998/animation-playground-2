@@ -1,3 +1,4 @@
+import { preset } from "@/config/preset";
 import { useRequestAnimation } from "@/hooks/useRequestAnimation";
 import { useRef } from "react";
 
@@ -23,14 +24,14 @@ export const useSpring = <T extends HTMLElement>(config: {
     const { position, velocity } = animationState.current;
     const {
       springPosition,
-      stiffness = 0.4 / 16 / 16 / 16,
-      damping = 0.8 / 15,
+      stiffness = preset.noWobble.stiffness,
+      damping = preset.noWobble.damping,
       precision = 0.01,
     } = config;
-    const timeDelta = time - animationState.current.time;
+    const timeDelta = (time - animationState.current.time) / 1000;
 
     // Prevent animation jump when tab is inactive
-    if (timeDelta > 100) {
+    if (timeDelta > 0.1) {
       animationState.current.time = time;
       return true;
     }
