@@ -4,6 +4,7 @@
 
 1. number
 1. flip-card
+1. star
 
 ## Custom Spring
 

@@ -14,6 +14,8 @@ export default function Home() {
       <h1 className="text-4xl font-bold">Spring Parameter Picker</h1>
       <Inputs />
       <LineChart
+        xAxis={[{ data: cruve.map((_, i) => i * 16), label: "Time (ms)" }]}
+        yAxis={[{ label: "Value" }]}
         series={[
           {
             data: cruve,
@@ -21,7 +23,7 @@ export default function Home() {
             showMark: false,
           },
         ]}
-        width={1000}
+        width={800}
         height={400}
       />
     </div>

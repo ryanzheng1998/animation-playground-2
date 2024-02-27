@@ -4,6 +4,8 @@ export const generateCruve = (config: {
   stiffness: number;
   damping: number;
   precision: number;
+  mass: number;
+  timeSlowdown: number;
 }) => {
   let answer: number[] = [config.from];
 
@@ -14,11 +16,15 @@ export const generateCruve = (config: {
 
   while (true) {
     const { position, velocity } = animationState;
-    const { springPosition } = config;
-    const stiffness = config.stiffness;
-    const damping = config.damping;
-    const precision = config.precision;
-    const timeDelta = 16 / 1000;
+    const {
+      springPosition,
+      stiffness,
+      damping,
+      precision,
+      mass,
+      timeSlowdown,
+    } = config;
+    const timeDelta = 16 / 1000 / timeSlowdown;
 
     // Cancel animation frame when animation stop
     if (
@@ -38,7 +44,8 @@ export const generateCruve = (config: {
     const springForce = (springPosition - position) * stiffness;
     const dampingForce = -velocity * damping;
     const totalForce = springForce + dampingForce;
-    const nextVelocity = velocity + totalForce * timeDelta;
+    const acceleration = totalForce / mass;
+    const nextVelocity = velocity + acceleration * timeDelta;
     const nextPosition = position + nextVelocity * timeDelta;
 
     answer.push(nextPosition);

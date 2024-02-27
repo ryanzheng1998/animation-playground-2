@@ -99,6 +99,45 @@ export const Inputs = () => {
           state.setState({ precision: Number(e.target.value) });
         }}
       />
+
+      <label className="justify-self-end">Mass</label>
+      <input
+        type="range"
+        min={0}
+        max={10}
+        value={state.mass}
+        onChange={(e) => {
+          state.setState({ mass: Number(e.target.value) });
+        }}
+      />
+      <input
+        className="w-20"
+        type="number"
+        value={state.mass}
+        onChange={(e) => {
+          state.setState({ mass: Number(e.target.value) });
+        }}
+      />
+
+      <label className="justify-self-end">Time Slow Down</label>
+      <input
+        type="range"
+        min={0.1}
+        max={3}
+        step={0.1}
+        value={state.timeSlowdown}
+        onChange={(e) => {
+          state.setState({ timeSlowdown: Number(e.target.value) });
+        }}
+      />
+      <input
+        className="w-20"
+        type="number"
+        value={state.timeSlowdown}
+        onChange={(e) => {
+          state.setState({ timeSlowdown: Number(e.target.value) });
+        }}
+      />
     </div>
   );
 };
