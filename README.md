@@ -5,6 +5,7 @@
 1. number
 1. flip-card
 1. star
+1. flip-animation
 
 ## Custom Spring
 
