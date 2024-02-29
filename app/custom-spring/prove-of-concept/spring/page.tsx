@@ -1,57 +1,86 @@
 "use client";
 
-import { useRequestAnimation } from "@/hooks/useRequestAnimation";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
-  const ref = useRef<HTMLDivElement>(null);
+  const damping = 10;
+  const springStiffness = 200;
+  const timeSlowdown = 5;
+  const precision = 0.1;
+  const [springPosition, setSpringPosition] = useState(0);
 
   const animationState = useRef({
     time: 0,
     position: 0,
     velocity: 0,
-    damping: 12,
-    springPosition: 0,
-    springStiffness: 180,
+    element: null as HTMLDivElement | null,
   });
 
-  useRequestAnimation((time) => {
-    const element = ref.current;
+  useEffect(() => {
+    let animationId = 0;
 
-    if (element === null) return;
+    const step = (time: number) => {
+      console.log("step");
+      const element = animationState.current.element;
+      if (element === null) return;
+      const { position, velocity } = animationState.current;
 
-    const { position, velocity } = animationState.current;
-    const timeDelta = (time - animationState.current.time) / 1000;
-    const springPosition = animationState.current.springPosition;
-    const springStiffness = animationState.current.springStiffness;
+      const timeDelta =
+        (time - animationState.current.time) / 1000 / timeSlowdown;
 
-    const springForce = (springPosition - position) * springStiffness;
-    const dampingForce = -velocity * animationState.current.damping;
-    const totalForce = springForce + dampingForce;
-    const nextVelocity = velocity + totalForce * timeDelta;
-    const nextPosition = position + nextVelocity * timeDelta;
+      if (timeDelta > 0.1) {
+        animationState.current.time = time;
+        animationId = requestAnimationFrame(step);
+        return;
+      }
 
-    element.style.transform = `translateX(${nextPosition}px)`;
+      if (
+        Math.abs(velocity) < precision &&
+        Math.abs(springPosition - position) < precision
+      ) {
+        animationState.current = {
+          ...animationState.current,
+          velocity: 0,
+          position: springPosition,
+        };
+        return;
+      }
 
-    animationState.current = {
-      ...animationState.current,
-      time,
-      position: nextPosition,
-      velocity: nextVelocity,
+      const springForce = (springPosition - position) * springStiffness;
+      const dampingForce = -velocity * damping;
+      const totalForce = springForce + dampingForce;
+      const nextVelocity = velocity + totalForce * timeDelta;
+      const nextPosition = position + nextVelocity * timeDelta;
+
+      element.style.transform = `translateX(${nextPosition}px)`;
+
+      animationState.current = {
+        ...animationState.current,
+        time,
+        position: nextPosition,
+        velocity: nextVelocity,
+      };
+
+      animationId = requestAnimationFrame(step);
     };
-  }, []);
+
+    animationId = requestAnimationFrame(step);
+
+    return () => cancelAnimationFrame(animationId);
+  }, [springPosition]);
 
   return (
     <div>
-      <div className="h-[300px] w-[300px] bg-green-500" ref={ref} />
+      <div
+        className="h-[300px] w-[300px] bg-green-500"
+        ref={(el) => (animationState.current.element = el)}
+      />
       <button
         onClick={() => {
-          const currentSpringPosition = animationState.current.springPosition;
-          animationState.current.springPosition =
-            currentSpringPosition === 0 ? 500 : 0;
+          setSpringPosition((x) => (x === 0 ? 500 : 0));
         }}
       >
-        Reverse Spring
+        Apply Force
       </button>
     </div>
   );

@@ -8,6 +8,7 @@ interface State {
   precision: number;
   mass: number;
   timeSlowdown: number;
+  initialVelocity: number;
   setState: (config: {
     from?: number;
     springPosition?: number;
@@ -16,6 +17,7 @@ interface State {
     precision?: number;
     mass?: number;
     timeSlowdown?: number;
+    initialVelocity?: number;
   }) => void;
 }
 
@@ -27,6 +29,7 @@ export const useStore = create<State>((set) => ({
   precision: 0.01,
   mass: 1,
   timeSlowdown: 1,
+  initialVelocity: 0,
   setState: (config: {
     from?: number;
     springPosition?: number;
@@ -35,6 +38,7 @@ export const useStore = create<State>((set) => ({
     precision?: number;
     mass?: number;
     timeSlowdown?: number;
+    initialVelocity?: number;
   }) => {
     set((state) => ({
       ...state,

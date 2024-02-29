@@ -6,12 +6,13 @@ export const generateCruve = (config: {
   precision: number;
   mass: number;
   timeSlowdown: number;
+  initialVelocity: number;
 }) => {
   let answer: number[] = [config.from];
 
   const animationState = {
     position: config.from,
-    velocity: 0,
+    velocity: config.initialVelocity,
   };
 
   while (true) {

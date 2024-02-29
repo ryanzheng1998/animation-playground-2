@@ -1,7 +1,7 @@
 "use client";
 
 import { preset } from "@/config/preset";
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 
 export default function Home() {
   const [flip, setFlip] = useState(false);
@@ -11,7 +11,7 @@ export default function Home() {
 
   const velocityRef = useRef(0);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const element = ref.current;
     if (element === null) return;
     const first = element.getBoundingClientRect();
@@ -25,16 +25,16 @@ export default function Home() {
 
     // play
     let position = first.left - last.left;
-    let velocity = velocityRef.current;
     let time = performance.now();
 
     const springPosition = 0;
     const stiffness = preset.noWobble.stiffness;
     const damping = preset.noWobble.damping;
     const precision = 0.01;
-    const timeSlowdown = 5;
+    const timeSlowdown = 1;
 
     const step = (t: number) => {
+      const velocity = velocityRef.current;
       const timeDelta = (t - time) / 1000 / timeSlowdown;
 
       if (timeDelta > 0.1) {
@@ -48,6 +48,7 @@ export default function Home() {
         Math.abs(position - springPosition) < precision
       ) {
         element.style.transform = "";
+        velocityRef.current = 0;
         return;
       }
 
@@ -60,7 +61,7 @@ export default function Home() {
       element.style.transform = `translateX(${position}px)`;
 
       time = t;
-      velocity = nextVelocity;
+      velocityRef.current = nextVelocity;
       position = nextPosition;
       animationRef.current = requestAnimationFrame(step);
     };

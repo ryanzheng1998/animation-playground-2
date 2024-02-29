@@ -1,40 +1,65 @@
 "use client";
 
-import { useRequestAnimation } from "@/hooks/useRequestAnimation";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
-  const ref = useRef<HTMLDivElement>(null);
+  const [go, setGo] = useState(false);
 
-  let animationState = {
+  const animationState = useRef({
     time: 0,
     position: 0,
-    velocity: 0.5,
-  };
+    velocity: 10,
+    element: null as HTMLDivElement | null,
+  });
 
-  useRequestAnimation((time) => {
-    const element = ref.current;
+  useEffect(() => {
+    let animationId = 0;
 
-    if (element) {
-      const { position, velocity } = animationState;
+    const step = (time: number) => {
+      if (!go) return;
+      const element = animationState.current.element;
+      if (element === null) return;
+      const { position, velocity } = animationState.current;
 
-      const timeDelta = time - animationState.time;
+      const timeDelta = (time - animationState.current.time) / 1000;
+
+      if (timeDelta > 0.1) {
+        animationState.current.time = time;
+        animationId = requestAnimationFrame(step);
+        return;
+      }
 
       const nextPosition = position + velocity * timeDelta;
 
       element.style.transform = `translateX(${nextPosition}px)`;
 
-      animationState = {
+      animationState.current = {
+        ...animationState.current,
         time,
         position: nextPosition,
-        velocity,
       };
-    }
-  }, []);
+
+      animationId = requestAnimationFrame(step);
+    };
+
+    animationId = requestAnimationFrame(step);
+
+    return () => cancelAnimationFrame(animationId);
+  }, [go]);
 
   return (
     <div>
-      <div className="h-[300px] w-[300px] bg-green-500" ref={ref} />
+      <div
+        className="h-[300px] w-[300px] bg-green-500"
+        ref={(el) => (animationState.current.element = el)}
+      />
+      <button
+        onClick={() => {
+          setGo((x) => !x);
+        }}
+      >
+        {go ? "Stop" : "Start"}
+      </button>
     </div>
   );
 }

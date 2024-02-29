@@ -138,6 +138,25 @@ export const Inputs = () => {
           state.setState({ timeSlowdown: Number(e.target.value) });
         }}
       />
+
+      <label className="justify-self-end">Initial Velocity</label>
+      <input
+        type="range"
+        min={-100}
+        max={100}
+        value={state.initialVelocity}
+        onChange={(e) => {
+          state.setState({ initialVelocity: Number(e.target.value) });
+        }}
+      />
+      <input
+        className="w-20"
+        type="number"
+        value={state.initialVelocity}
+        onChange={(e) => {
+          state.setState({ initialVelocity: Number(e.target.value) });
+        }}
+      />
     </div>
   );
 };
