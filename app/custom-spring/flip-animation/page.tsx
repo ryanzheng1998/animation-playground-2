@@ -1,72 +1,94 @@
 "use client";
 
-import { preset } from "@/config/preset";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 
 export default function Home() {
   const [flip, setFlip] = useState(false);
 
-  return (
-    <button
-      onClick={(e) => {
-        setFlip((x) => !x);
-        const element = e.currentTarget;
-        const first = element.getBoundingClientRect();
-        element.style.transform = "";
-        element.style.right = flip ? "" : "0";
-        element.style.left = flip ? "0" : "";
-        const last = element.getBoundingClientRect();
+  const ref = useRef<HTMLParagraphElement>(null);
+  const velocityRef = useRef(0);
 
-        // invert
-        element.style.transform = `translateX(${first.left - last.left}px)`;
+  useLayoutEffect(() => {
+    // config
+    const timeSlowdown = 1;
+    const springPosition = 0;
+    const stiffness = 170;
+    const damping = 26;
+    const precision = 0.01;
 
-        // play
-        let position = first.left - last.left;
-        let velocity = 0;
-        let time = performance.now();
+    let animationId = -1;
+    const element = ref.current;
+    if (element === null) return;
 
-        const springPosition = 0;
-        const stiffness = preset.noWobble.stiffness;
-        const damping = preset.noWobble.damping;
-        const precision = 0.01;
-        const timeSlowdown = 1;
+    // first
+    const first = element.getBoundingClientRect();
 
-        const step = (t: number) => {
-          const timeDelta = (t - time) / 1000 / timeSlowdown;
+    // last
+    element.style.transform = "";
+    element.style.right = flip ? "" : "0";
+    element.style.left = flip ? "0" : "";
+    const last = element.getBoundingClientRect();
 
-          if (timeDelta > 0.1) {
-            time = t;
-            requestAnimationFrame(step);
-            return;
-          }
+    // invert
+    element.style.transform = `translateX(${first.left - last.left}px)`;
 
-          if (
-            velocity < precision &&
-            Math.abs(position - springPosition) < precision
-          ) {
-            element.style.transform = "";
-            return;
-          }
+    // play
+    let position = first.left - last.left;
+    let time = performance.now();
 
-          const springForce = (springPosition - position) * stiffness;
-          const dampingForce = -velocity * damping;
-          const totalForce = springForce + dampingForce;
-          const nextVelocity = velocity + totalForce * timeDelta;
-          const nextPosition = position + nextVelocity * timeDelta;
+    const step = (t: number) => {
+      const velocity = velocityRef.current;
+      const timeDelta = (t - time) / 1000 / timeSlowdown;
 
-          element.style.transform = `translateX(${position}px)`;
-
-          time = t;
-          velocity = nextVelocity;
-          position = nextPosition;
-          requestAnimationFrame(step);
-        };
-
+      if (timeDelta > 0.1) {
+        time = t;
         requestAnimationFrame(step);
-      }}
-      className="fixed text-9xl"
-    >
-      FLIP
-    </button>
+        return;
+      }
+
+      if (
+        velocity < precision &&
+        Math.abs(position - springPosition) < precision
+      ) {
+        element.style.transform = "";
+        velocityRef.current = 0;
+        return;
+      }
+
+      const springForce = (springPosition - position) * stiffness;
+      const dampingForce = -velocity * damping;
+      const totalForce = springForce + dampingForce;
+      const nextVelocity = velocity + totalForce * timeDelta;
+      const nextPosition = position + nextVelocity * timeDelta;
+
+      element.style.transform = `translateX(${position}px)`;
+
+      time = t;
+      velocityRef.current = nextVelocity;
+      position = nextPosition;
+      animationId = requestAnimationFrame(step);
+    };
+
+    animationId = requestAnimationFrame(step);
+
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, [flip]);
+
+  return (
+    <>
+      <p ref={ref} className="fixed text-9xl">
+        FLIP
+      </p>
+      <button
+        className="fixed top-80 text-9xl"
+        onClick={() => {
+          setFlip((x) => !x);
+        }}
+      >
+        Action!
+      </button>
+    </>
   );
 }

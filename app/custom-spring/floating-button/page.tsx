@@ -1,13 +1,121 @@
 "use client";
 
-import { preset } from "@/config/preset";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const buttons = ["red", "green", "blue", "orange"];
 
+interface AnimationState {
+  time: number;
+  elements: {
+    position: number;
+    velocity: number;
+    element: HTMLElement | SVGElement | null;
+    transform: (position: number, element: HTMLElement | SVGElement) => void;
+  }[];
+}
+
 export default function Home() {
   const [float, setFloat] = useState(true);
-  const refs = useRef<HTMLDivElement[]>([]);
+
+  const timeSlowdown = 2;
+
+  const spring = {
+    position: float ? 180 : 0,
+    damping: 12,
+    springStiffness: 180,
+    precision: 0.01,
+  };
+
+  const animationState = useRef<AnimationState>({
+    time: 0,
+    elements: buttons.map(() => ({
+      position: 0,
+      velocity: 0,
+      element: null,
+      transform: (position, element) => {
+        element.style.transform = `translateY(${position}px)`;
+      },
+    })),
+  });
+
+  useEffect(() => {
+    let animationId = 0;
+
+    const step = (time: number) => {
+      const timeDelta =
+        (time - animationState.current.time) / 1000 / timeSlowdown;
+
+      // prevent animation jump when tab is inactive
+      if (timeDelta > 0.1) {
+        animationState.current.time = time;
+        animationId = requestAnimationFrame(step);
+        return;
+      }
+
+      // stop animation to save battery
+      const allElementsAreAtRest = animationState.current.elements.every(
+        (el) => el.velocity === 0 && spring.position === el.position,
+      );
+      if (allElementsAreAtRest) {
+        return;
+      }
+
+      // calculate next position and velocity
+      const next = animationState.current.elements.map((el, i) => {
+        const {
+          damping,
+          position: springPosition,
+          springStiffness,
+          precision,
+        } = spring;
+
+        const { position, velocity, element, transform } = el;
+        if (element === null) throw new Error("Element is null");
+
+        const springForce = (springPosition - position) * springStiffness;
+        const dampingForce = -velocity * damping;
+        const totalForce = springForce + dampingForce;
+        const nextVelocity = velocity + totalForce * timeDelta;
+        const nextPosition = position + nextVelocity * timeDelta;
+
+        if (
+          Math.abs(velocity) < precision &&
+          Math.abs(springPosition - position) < precision
+        ) {
+          return {
+            ...el,
+            position: springPosition,
+            velocity: 0,
+          };
+        }
+
+        return {
+          ...el,
+          position: nextPosition,
+          velocity: nextVelocity,
+        };
+      });
+
+      // start transform
+      next.forEach((el) => {
+        el.transform(el.position, el.element!);
+      });
+
+      // update state
+      animationState.current = {
+        ...animationState.current,
+        time,
+        elements: next,
+      };
+
+      // next frame
+      animationId = requestAnimationFrame(step);
+    };
+
+    animationId = requestAnimationFrame(step);
+
+    return () => cancelAnimationFrame(animationId);
+  }, [spring]);
 
   return (
     <div className="grid h-screen w-screen justify-center pb-[100px]">
@@ -16,67 +124,6 @@ export default function Home() {
           className="z-30 aspect-square w-[100px] cursor-pointer rounded-full bg-black"
           onClick={() => {
             setFloat((x) => !x);
-            const firsts = refs.current.map((element) =>
-              element.getBoundingClientRect(),
-            );
-
-            refs.current.forEach((element) => {
-              element.style.transform = "";
-              element.style.position = float ? "absolute" : "relative";
-            });
-
-            refs.current.forEach((element, i) => {
-              if (element === null) return;
-              const first = firsts[i];
-              if (first === undefined) return;
-              const last = element.getBoundingClientRect();
-
-              // invert
-              element.style.transform = `translateY(${first.top - last.top}px)`;
-
-              // play
-              let position = first.top - last.top;
-              let velocity = 0;
-              let time = performance.now();
-
-              const springPosition = 0;
-              const stiffness = preset.wobbly.stiffness;
-              const damping = preset.wobbly.damping;
-              const precision = 0.01;
-              const timeSlowdown = 1;
-
-              const step = (t: number) => {
-                const timeDelta = (t - time) / 1000 / timeSlowdown;
-
-                if (timeDelta > 0.1) {
-                  time = t;
-                  requestAnimationFrame(step);
-                }
-
-                if (
-                  velocity < precision &&
-                  Math.abs(position - springPosition) < precision
-                ) {
-                  element.style.transform = "";
-                  return;
-                }
-
-                const springForce = (springPosition - position) * stiffness;
-                const dampingForce = -velocity * damping;
-                const totalForce = springForce + dampingForce;
-                const nextVelocity = velocity + totalForce * timeDelta;
-                const nextPosition = position + nextVelocity * timeDelta;
-
-                element.style.transform = `translateY(${position}px)`;
-
-                time = t;
-                velocity = nextVelocity;
-                position = nextPosition;
-                requestAnimationFrame(step);
-              };
-
-              requestAnimationFrame(step);
-            });
           }}
         />
         {buttons.map((color, i) => {
@@ -84,7 +131,7 @@ export default function Home() {
             <div
               ref={(element) => {
                 if (element === null) return;
-                refs.current[i] = element;
+                animationState.current.elements[i]!.element = element;
               }}
               key={color}
               className="aspect-square w-[100px] rounded-full"

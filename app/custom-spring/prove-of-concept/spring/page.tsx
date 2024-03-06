@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from "react";
 export default function Home() {
   const damping = 10;
   const springStiffness = 200;
-  const timeSlowdown = 5;
-  const precision = 0.1;
+  const timeSlowdown = 1;
+  const precision = 0.01;
   const [springPosition, setSpringPosition] = useState(0);
 
   const animationState = useRef({
@@ -20,7 +20,6 @@ export default function Home() {
     let animationId = 0;
 
     const step = (time: number) => {
-      console.log("step");
       const element = animationState.current.element;
       if (element === null) return;
       const { position, velocity } = animationState.current;
@@ -28,18 +27,22 @@ export default function Home() {
       const timeDelta =
         (time - animationState.current.time) / 1000 / timeSlowdown;
 
+      // prevent animation jump when tab is inactive
       if (timeDelta > 0.1) {
         animationState.current.time = time;
         animationId = requestAnimationFrame(step);
         return;
       }
 
+      // stop animation to save battery
       if (
         Math.abs(velocity) < precision &&
         Math.abs(springPosition - position) < precision
       ) {
+        element.style.transform = `translateX(${springPosition}px)`;
         animationState.current = {
           ...animationState.current,
+          time,
           velocity: 0,
           position: springPosition,
         };
